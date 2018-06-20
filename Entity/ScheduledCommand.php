@@ -2,14 +2,18 @@
 
 namespace JMose\CommandSchedulerBundle\Entity;
 
+use MKebza\SonataExt\ORM\ActionLog\ActionLoggable;
+use MKebza\SonataExt\ORM\ActionLog\ActionLoggableInterface;
+
 /**
  * Entity ScheduledCommand
  *
  * @author  Julien Guyon <julienguyon@hotmail.com>
  * @package JMose\CommandSchedulerBundle\Entity
  */
-class ScheduledCommand
+class ScheduledCommand implements ActionLoggableInterface
 {
+    use ActionLoggable;
 
     /**
      * @var integer
@@ -391,4 +395,8 @@ class ScheduledCommand
         return $this;
     }
 
+    public function __toString(): string
+    {
+        return (string)$this->getName();
+    }
 }

@@ -3,6 +3,7 @@
 namespace JMose\CommandSchedulerBundle\Command;
 
 use Cron\CronExpression;
+use MKebza\SonataExt\Entity\ActionLog;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Input\InputInterface;
@@ -217,7 +218,11 @@ class ExecuteCommand extends ContainerAwareCommand
                 '<info>Execute</info> : <comment>'.$scheduledCommand->getCommand()
                 .' '.$scheduledCommand->getArguments().'</comment>'
             );
-            $result = $command->run($input, $logOutput);
+
+            // We use application so we get events triggered
+            $application = new \Symfony\Bundle\FrameworkBundle\Console\Application($this->getContainer()->get('kernel'));
+            $result = $application->doRun($input, $logOutput);
+            // $result = $command->run($input, $logOutput);
         } catch (\Exception $e) {
             $logOutput->writeln($e->getMessage());
             $logOutput->writeln($e->getTraceAsString());
@@ -233,6 +238,13 @@ class ExecuteCommand extends ContainerAwareCommand
         $scheduledCommand->setLastReturnCode($result);
         $scheduledCommand->setLocked(false);
         $scheduledCommand->setExecuteImmediately(false);
+
+        if ($result == 0) {
+            $scheduledCommand->logAction(ActionLog::success(sprintf("Command '%s' finished with code '%s'", (string)$scheduledCommand, $result)));
+        } else {
+            $scheduledCommand->logAction(ActionLog::error(sprintf("Command '%s' finished with code '%s'", (string)$scheduledCommand, $result)));
+        }
+
         $this->em->flush();
 
         /*
