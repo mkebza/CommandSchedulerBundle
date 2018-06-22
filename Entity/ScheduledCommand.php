@@ -2,6 +2,7 @@
 
 namespace JMose\CommandSchedulerBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use MKebza\SonataExt\ORM\ActionLog\ActionLoggable;
 use MKebza\SonataExt\ORM\ActionLog\ActionLoggableInterface;
 
@@ -87,6 +88,7 @@ class ScheduledCommand implements ActionLoggableInterface
     {
         $this->setLastExecution(new \DateTime());
         $this->setLocked(false);
+        $this->loggedActions = new ArrayCollection();
     }
 
     /**
